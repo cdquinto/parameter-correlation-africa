@@ -61,7 +61,7 @@ pairs(data.subset, lower.panel=panel.smooth,upper.panel = panel.cor)
 
 ```{r plot3, echo=FALSE}
 corr.mat2<-cor.matrix(variables=d(Asc_NAF,Asc_NEU,Asc_NCHB,daf,Log10_NAF,Log10_NEU,Log10_NCHB,NEU_AS,TEU_AS,TAF),
-                      data=data.subset,
+                      data=data.subset, var_text_size=5,
                       test=cor.test,
                       method='spearman',
                       alternative="two.sided",exact=FALSE)
