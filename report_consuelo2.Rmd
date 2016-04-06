@@ -61,8 +61,8 @@ pairs(data.subset, lower.panel=panel.smooth,upper.panel = panel.cor)
 ## Scatter matrix with fit
 
 ```{r plot3, echo=FALSE}
-corr.mat2<-cor.matrix(variables=d(Asc_NAF,Asc_NEU,Asc_NCHB,daf,Log10_NAF,Log10_NEU,Log10_NCHB,NEU_AS,TEU_AS,TAF),
-                      data=data.subset, var_text_size=5,
+corr.mat2<-cor.matrix(variables=d(Asc_NAF,Asc_NEU,Asc_NCHB,daf,Log10_NAF,Log10_NCEU,Log10_NCHB,NEU_AS,TEU_AS,TAF,Log10_NAT,Log10_NIBS,Log10_NMEX,TCEU_IBS,TCHB_NAT,TADM,PADM),
+                      data=data.subset, var_text_size=2,
                       test=cor.test,
                       method='pearson',
                       alternative="two.sided",exact=FALSE)
