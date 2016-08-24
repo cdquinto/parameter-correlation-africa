@@ -1,0 +1,37 @@
+---
+title: "Analysis of SNPs axiom"
+author: "Renan Escalante-Chong"
+date: "August 23, 2016"
+output: html_document
+---
+
+# SNP analysis
+
+```{r}
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(stringr)
+```
+
+```{r readData}
+# Lista de snps para buscar en los otros archivos
+snps.query<-fread("files/region_21_chr1.bim")
+```
+
+```{r}
+#Importar archivos de las poblaciones
+#Líneas son SNPs
+POLYNESIA<-fread("files/POLYNESIA_region_21_chr1_snps.txt.tped")
+NAT<-fread("files/samples_NAT_10kb_region_21_chr1.tped")
+HAPMAP<-fread("files/samples_asc_axiom_lat_10kb_region_21_chr1.tped")
+```
+
+Primero matchear los SNPs de snps.query a los SNPs de NAT y HAPMAP
+
+```{r}
+NAT %>% dplyr::filter(V4 %in% snps.query$V4)
+HAPMAP %>% dplyr::filter(V4 %in% snps.query$V4)
+```
+
+
