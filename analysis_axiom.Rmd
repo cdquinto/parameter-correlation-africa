@@ -1,0 +1,97 @@
+---
+title: "Analysis of SNPs axiom"
+author: "Renan Escalante-Chong"
+date: "August 23, 2016"
+output: html_document
+---
+
+# SNP analysis
+
+```{r}
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(stringr)
+```
+
+```{r readData}
+# Lista de snps para buscar en los otros archivos
+snps.query<-fread("files/region_21_chr1.bim")
+#snps.query<-fread("files/region_1021_chr9.bim")
+```
+
+```{r}
+#Importar archivos de las poblaciones
+#Líneas son SNPs
+#file1<-"files/POLYNESIA_region_1021_chr9_snps.txt.tped"
+#file2<-"files/samples_NAT_10kb_region_1021_chr9.tped"
+#file3<-"files/samples_asc_axiom_lat_10kb_region_1021_chr9.tped"
+
+file1<-"files/POLYNESIA_region_21_chr1_snps.txt.tped"
+file2<-"files/samples_NAT_10kb_region_21_chr1.tped"
+file3<-"files/samples_asc_axiom_lat_10kb_region_21_chr1.tped"
+  
+
+POLYNESIA<-fread(file1)
+NAT<-fread(file2)
+HAPMAP<-fread(file3)
+```
+
+Primero matchear los SNPs de snps.query a los SNPs de NAT y HAPMAP
+
+```{r}
+NAT %>% dplyr::filter(V4 %in% snps.query$V4)
+HAPMAP %>% dplyr::filter(V4 %in% snps.query$V4)
+POLYNESIA %>% dplyr::filter(V4 %in% snps.query$V4)
+```
+
+```{r}
+# Agregar una columna a cada población que va a ser el índice de esa fila
+# Luego voy a poner todas las poblaciones en un solo archivo
+# Seleccionar las que estan en el bim
+
+NAT$index<-1:nrow(NAT)
+POLYNESIA$index<-1:nrow(POLYNESIA)
+HAPMAP$index<-1:nrow(HAPMAP)
+snps.query$index<-1:nrow(snps.query)
+
+#Matching columns
+pop1<-NAT %>% dplyr::select(c(V4, index))
+pop2<-POLYNESIA %>% dplyr::select(c(V4, index))
+pop3<-HAPMAP %>% dplyr::select(c(V4, index))
+pop4<-snps.query %>% dplyr::select(c(V4, index))
+  
+tmp.df<-full_join(pop1, pop2, by="V4")
+final.df<-full_join(tmp.df,pop3, by="V4")
+final.df<-full_join(final.df,pop4, by="V4")
+colnames(final.df)<-c("V4","NAT","POL","HAPMAP","bim")
+
+# Seleccionar el SNP que está en los 3 (complete cases)
+final.df.complete<-final.df[complete.cases(final.df),]
+
+#Seleccionar casos donde está en el BIM
+bim.SNPs.across.populations<-final.df.complete %>% dplyr::filter(V4 %in% snps.query$V4)
+
+```
+
+Extraer columnas donde estan los SNPs
+
+```{r}
+
+pol.out<-POLYNESIA[bim.SNPs.across.populations$POL,] %>% dplyr::select(-index)
+hap.out<-HAPMAP[bim.SNPs.across.populations$HAPMAP,] %>% dplyr::select(-index)
+nat.out<-NAT[bim.SNPs.across.populations$NAT,] %>% dplyr::select(-index)
+# Agregar el caso de bim
+
+# Write out files
+pol.out.filename<-str_replace(file1,".txt.tped","_axiom.txt.tped")
+hap.out.filename<-str_replace(file2,".tped","_axiom.txt.tped")
+nat.out.filename<-str_replace(file3,".tped","_axiom.txt.tped")
+
+write.table(pol.out,file=pol.out.filename,quote = FALSE, col.names = FALSE, row.names = FALSE)
+write.table(hap.out,file=hap.out.filename,quote = FALSE, col.names = FALSE, row.names = FALSE)
+write.table(nat.out,file=nat.out.filename,quote = FALSE, col.names = FALSE, row.names = FALSE)
+```
+
+
+

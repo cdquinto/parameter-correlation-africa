@@ -1,0 +1,73 @@
+---
+title: "Analysis_scatter_matrix"
+author: "Renan Escalante-Chong"
+date: "March 16, 2016"
+output: beamer_presentation
+---
+
+
+This is the correlation matrix where the red line is smooth line.
+
+```{r loadingLibraries, include=FALSE}
+library(data.table)
+library(dplyr)
+library(ggplot2)
+library(Deducer)
+
+```
+
+```{r, include=FALSE}
+filename<-"results_regions_5percent_ss_10kb_NEW_Affy_snps_210116_nohap_transformer_1M_8pls.txt_500_model0_BestSimsParamStats_Obs0.txt"
+data<-fread(filename,data.table = FALSE)
+columns.select<-c(3:6,7:12)
+
+#Column selection
+data.subset<-data %>% dplyr::select(columns.select)
+
+```
+
+```{r functionImport, include=FALSE}
+panel.cor <- function(x, y, digits = 2, cex.cor, ...)
+{
+  usr <- par("usr"); on.exit(par(usr))
+  par(usr = c(0, 1, 0, 1))
+  # correlation coefficient
+  r <- cor(x, y)
+  txt <- format(c(r, 0.123456789), digits = digits)[1]
+  txt <- paste("r= ", txt, sep = "")
+  text(0.5, 0.6, txt)
+  
+  # p-value calculation
+  p <- cor.test(x, y)$p.value
+  txt2 <- format(c(p, 0.123456789), digits = digits)[1]
+  txt2 <- paste("p= ", txt2, sep = "")
+  if(p<0.01) txt2 <- paste("p= ", "<0.01", sep = "")
+  text(0.5, 0.4, txt2)
+}
+```
+
+## Scatter matrix
+
+```{r plot1, echo=FALSE}
+pairs(iris, upper.panel = panel.cor)
+```
+
+## Scatter matrix with smooth line
+
+```{r plot2, echo=FALSE}
+pairs(data.subset, lower.panel=panel.smooth,upper.panel = panel.cor)
+```
+
+## Scatter matrix with fit
+
+```{r plot3, echo=FALSE}
+corr.mat2<-cor.matrix(variables=d(Asc_NAF,Asc_NEU,Asc_NCHB,daf,Log10_NAF,Log10_NEU,Log10_NCHB,NEU_AS,TEU_AS,TAF),
+                      data=data.subset,
+                      test=cor.test,
+                      method='spearman',
+                      alternative="two.sided",exact=FALSE)
+
+p<-ggcorplot(corr.mat2,data = data.subset)
+print(p)
+```
+
